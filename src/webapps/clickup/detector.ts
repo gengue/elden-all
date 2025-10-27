@@ -22,73 +22,77 @@ export class ClickUpDetector {
     }
 
     private setupInboxCountMonitor(): void {
-        // Find the inbox button/badge element - try multiple selectors
-        const findInboxBadgeElement = (): Element | null => {
-            // First try to find badge directly
-            for (const selector of SELECTORS.inboxBadge) {
-                const element = document.querySelector(selector)
-                if (element) {
-                    return element
+        // Check if we're in the inbox view
+        const isInInboxView = (): boolean => {
+            const inUrl = window.location.href.includes('/inbox')
+
+            for (const selector of SELECTORS.inboxView) {
+                if (document.querySelector(selector)) {
+                    return true
                 }
             }
 
-            // Fallback: find inbox button and look for badge inside
-            for (const buttonSelector of SELECTORS.inboxButton) {
-                const button = document.querySelector(buttonSelector)
-                if (button) {
-                    // Look for badge/count within button
-                    const badge = button.querySelector('[class*="badge"], [class*="count"], span')
-                    if (badge) return badge
+            return inUrl
+        }
+
+        // Get count of inbox items
+        const getInboxItemCount = (): number | null => {
+            // Strategy 1: Count individual inbox items
+            for (const selector of SELECTORS.inboxItem) {
+                const items = document.querySelectorAll(selector)
+                if (items.length > 0) {
+                    return items.length
+                }
+            }
+
+            // Strategy 2: Check for empty state
+            for (const selector of SELECTORS.emptyState) {
+                const emptyElement = document.querySelector(selector)
+                if (emptyElement) {
+                    return 0
+                }
+            }
+
+            // Strategy 3: Check inbox list container
+            for (const selector of SELECTORS.inboxItemsList) {
+                const list = document.querySelector(selector)
+                if (list) {
+                    const childCount = list.children.length
+                    if (childCount > 0) return childCount
+                    return 0
                 }
             }
 
             return null
         }
 
-        // Get current inbox count from badge element
-        const getInboxCount = (element: Element | null): number | null => {
-            if (!element) return null
-
-            // Try to get count from text content
-            const text = element.textContent?.trim()
-            if (text) {
-                const match = text.match(/\d+/)
-                if (match) return parseInt(match[0], 10)
-            }
-
-            // Try aria-label
-            const ariaLabel = element.getAttribute('aria-label')
-            if (ariaLabel) {
-                const match = ariaLabel.match(/\d+/)
-                if (match) return parseInt(match[0], 10)
-            }
-
-            // Try data attributes
-            const dataCount = element.getAttribute('data-count') || element.getAttribute('data-value')
-            if (dataCount) {
-                const parsed = parseInt(dataCount, 10)
-                if (!isNaN(parsed)) return parsed
-            }
-
-            // If badge exists but no count found, assume 0
-            return 0
+        // Check if in inbox view initially
+        if (!isInInboxView()) {
+            setTimeout(() => this.setupInboxCountMonitor(), 2000)
+            return
         }
 
-        // Initialize with current count
-        const initialElement = findInboxBadgeElement()
-        this.previousInboxCount = getInboxCount(initialElement)
+        // Get initial count
+        this.previousInboxCount = getInboxItemCount()
 
-        // If inbox badge not found yet, retry after a delay
-        if (!initialElement) {
+        // If can't determine count yet, retry
+        if (this.previousInboxCount === null) {
             setTimeout(() => this.setupInboxCountMonitor(), 1000)
             return
         }
 
         // Poll for changes every 500ms
-        // Uses polling because DOM changes might not trigger proper mutations
         this.inboxCountInterval = window.setInterval(() => {
-            const element = findInboxBadgeElement()
-            const currentCount = getInboxCount(element)
+            // Re-check if still in inbox view
+            if (!isInInboxView()) {
+                this.cleanup()
+                return
+            }
+
+            const currentCount = getInboxItemCount()
+
+            // Only process if we can determine count
+            if (currentCount === null) return
 
             if (currentCount !== this.previousInboxCount) {
                 // Trigger banner when inbox goes from N > 0 to 0

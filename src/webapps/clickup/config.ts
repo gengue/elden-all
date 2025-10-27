@@ -11,22 +11,37 @@ export const DELAYS = {
 } as const
 
 // ClickUp UI selectors (may need updating if ClickUp changes their UI)
-// These are common patterns for notification badges - adjust after testing
+// Monitor the actual inbox VIEW/PAGE, not just notification badge
 export const SELECTORS = {
-    // Inbox/notification button - try multiple selectors for robustness
-    inboxButton: [
-        '[data-test="inbox-button"]',
-        'button[aria-label*="Inbox"]',
-        'button[aria-label*="Notifications"]',
-        '[class*="inbox"]',
-        '[class*="notification"]'
+    // Inbox view/container - the inbox page itself
+    inboxView: [
+        'cu3-notifications-top-header',
+        'cu3-notifications-list',
+        '[class*="notifications-context-menu"]',
+        '[data-test="inbox-view"]',
+        '[class*="inbox-view"]'
     ],
-    // Notification badge/count - common patterns
-    inboxBadge: [
-        '[data-test="inbox-button"] [class*="badge"]',
-        'button[aria-label*="Inbox"] [class*="badge"]',
-        '[class*="notification-badge"]',
-        '[class*="inbox-count"]',
-        'span[class*="count"]'
+    // Inbox items list container
+    inboxItemsList: [
+        'cu3-notifications-list-layout',
+        'cu3-notification-bundle',
+        '[class*="notifications-list-layout"]',
+        '[data-test="inbox-list"]'
+    ],
+    // Individual inbox items (to count them)
+    // ClickUp uses custom Angular elements: cu3-notification-row-layout
+    inboxItem: [
+        'cu3-notification-row-layout',
+        '[class*="cu-notification-row-layout"]',
+        '[data-pendo*="first-bundle-row"]'
+    ],
+    // Empty state indicator (when inbox is empty)
+    // When empty: scrollable_empty, list-layout_empty, inner_empty classes appear
+    emptyState: [
+        'cu3-empty-state',
+        '[class*="scrollable_empty"]',
+        '[class*="list-layout_empty"]',
+        '[class*="inner_empty"]',
+        '[class*="ng-trigger-loadingEnter"]'
     ]
 } as const
