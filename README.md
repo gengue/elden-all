@@ -1,9 +1,10 @@
 # Elden All
-Elden Ring experience for Git platforms (GitHub, GitLab) and web applications (Gmail)
+Elden Ring experience for Git platforms (GitHub, GitLab) and web applications (Gmail, ClickUp)
 
 Experience epic Elden Ring-style banners and sound effects when you:
 - **GitHub/GitLab**: Create issues, merge PRs, close issues, star repos, and more
 - **Gmail**: Send emails, clear your inbox to zero
+- **ClickUp**: Clear your notification inbox to zero
 
 > Inspired by/forked from: https://github.com/SaltyAom/elden-github
 
@@ -18,7 +19,9 @@ Experience epic Elden Ring-style banners and sound effects when you:
 
 ### Web Applications
 - ✅ Gmail (mail.google.com)
-- 🎯 Actions: Email sent, Inbox cleared
+  - 🎯 Actions: Email sent, Inbox cleared
+- ✅ ClickUp (app.clickup.com)
+  - 🎯 Actions: Inbox cleared
 
 ---
 

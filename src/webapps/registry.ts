@@ -1,5 +1,6 @@
 import type { WebApp, WebAppActionType } from './base'
 import { GmailWebApp } from './gmail'
+import { ClickUpWebApp } from './clickup'
 
 export class WebAppRegistry {
     private webapps: WebApp[] = []
@@ -7,6 +8,7 @@ export class WebAppRegistry {
 
     constructor() {
         this.registerWebApp(new GmailWebApp())
+        this.registerWebApp(new ClickUpWebApp())
     }
 
     private registerWebApp(webapp: WebApp): void {

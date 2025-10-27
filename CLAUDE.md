@@ -137,6 +137,18 @@ Used for web applications where actions are detected via DOM observation:
   - Language-agnostic (works with any Gmail language)
 - Uses MutationObserver to watch for compose dialog changes (for email sent)
 
+#### ClickUp WebApp (`src/webapps/clickup/`)
+- Hostname: `app.clickup.com`
+- Actions supported:
+  - `inboxCleared` - Polling-based detection (checks every 500ms)
+- **Inbox Cleared Detection:**
+  - Polls notification badge/count element every 500ms
+  - Multiple selectors to find inbox button and badge across different ClickUp versions
+  - Extracts count from badge text content, aria-label, or data attributes
+  - Triggers when count changes from N (> 0) → 0
+  - Uses polling for reliability (similar to Gmail approach)
+  - Retries if badge not found initially (1s delay)
+
 ## Adding New Platforms/WebApps
 
 ### Adding a New Git Platform (e.g., Bitbucket)
@@ -237,3 +249,4 @@ Defined in `src/platforms/base.ts`:
 ### WebApp Actions
 Defined in `src/webapps/base.ts`:
 - Gmail: `emailSent`, `inboxCleared` (both fully implemented)
+- ClickUp: `inboxCleared` (fully implemented)

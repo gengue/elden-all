@@ -9,14 +9,14 @@
         "128": "assets/elden-all-128.png"
     },
     "permissions": ["webRequest", "tabs", "storage"],
-    "host_permissions": ["https://github.com/*", "https://gitlab.com/*", "https://mail.google.com/*", "https://*/*"],
+    "host_permissions": ["https://github.com/*", "https://gitlab.com/*", "https://mail.google.com/*", "https://app.clickup.com/*", "https://*/*"],
     "background": {
         "service_worker": "background.js",
         "type": "module"
     },
     "content_scripts": [
         {
-            "matches": ["https://github.com/*", "https://gitlab.com/*", "https://mail.google.com/*", "https://*/*"],
+            "matches": ["https://github.com/*", "https://gitlab.com/*", "https://mail.google.com/*", "https://app.clickup.com/*", "https://*/*"],
             "js": ["content.js"],
             "run_at": "document_idle"
         }
