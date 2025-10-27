@@ -17,7 +17,9 @@ const banners = {
     repoDeleted: 'banners/repository-deleted.webp',
     repoStarred: 'banners/repository-starred.webp',
     repoUnstarred: 'banners/repository-unstarred.webp',
-    requestedChange: 'banners/requested-change.webp'
+    requestedChange: 'banners/requested-change.webp',
+    emailSent: 'banners/email-sent.webp',
+    inboxCleared: 'banners/inbox-cleared.webp'
 } as const
 
 export type Actions = keyof typeof banners
@@ -46,7 +48,9 @@ const bannerSounds = {
     repoDeleted: 'enemyFailed',
     repoStarred: 'newItem',
     repoUnstarred: 'enemyFailed',
-    requestedChange: 'enemyFailed'
+    requestedChange: 'enemyFailed',
+    emailSent: 'newItem',
+    inboxCleared: 'newItem'
 } as const satisfies { [image in Actions]: keyof typeof sounds }
 
 const animations = {
@@ -62,13 +66,23 @@ interface MessagePayload {
     delay?: number
     hostname?: string
     label?: string
+    type?: string
 }
+
+// Initialize WebApp support for Gmail and other web apps
+import { WebAppRegistry } from './webapps/registry'
+
+const webAppRegistry = new WebAppRegistry()
+webAppRegistry.initializeForHost(window.location.hostname)
 
 // Listen for background messages
 chrome.runtime.onMessage.addListener((message?: MessagePayload) => {
     if (!message?.action) return
 
-    show(message.action, message.delay, message.label)
+    // Handle both git platform messages and webapp messages
+    if (message.type === 'webapp_action' || message.action) {
+        show(message.action, message.delay, message.label)
+    }
 })
 
 function show(

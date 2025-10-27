@@ -2,10 +2,11 @@ import type { ActionType } from './platforms/base'
 import { registry } from './platforms/registry'
 
 interface MessagePayload {
-    action: ActionType
+    action: ActionType | string
     delay?: number
     hostname: string
     label?: string
+    type?: string
 }
 
 function dispatch(
@@ -37,6 +38,20 @@ async function initialize() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName === 'sync' && changes.eldenGithubSettings) {
             registry.refreshCustomDomains()
+        }
+    })
+
+    // Listen for messages from content scripts (for WebApp actions)
+    chrome.runtime.onMessage.addListener((message: MessagePayload, sender) => {
+        if (message.type === 'webapp_action' && sender.tab?.id) {
+            // Relay the webapp action back to the content script with proper formatting
+            chrome.tabs.sendMessage(sender.tab.id, {
+                action: message.action,
+                delay: message.delay,
+                hostname: message.hostname,
+                label: message.label,
+                type: 'webapp_action'
+            })
         }
     })
 }
@@ -82,3 +97,4 @@ chrome.webRequest.onCompleted.addListener(
     },
     { urls: ['https://github.com/*', 'https://gitlab.com/*', 'https://*/*'] }
 )
+
