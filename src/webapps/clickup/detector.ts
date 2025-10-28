@@ -4,6 +4,7 @@ import { SELECTORS, DELAYS } from './config'
 export class ClickUpDetector {
     private inboxCountInterval: number | null = null
     private previousInboxCount: number | null = null
+    private taskStatusClickHandler: ((event: Event) => void) | null = null
     private onActionDetected: (result: WebAppDetectionResult) => void
 
     constructor(onActionDetected: (result: WebAppDetectionResult) => void) {
@@ -12,12 +13,17 @@ export class ClickUpDetector {
 
     initialize(): void {
         this.setupInboxCountMonitor()
+        this.setupTaskStatusClickDetector()
     }
 
     cleanup(): void {
         if (this.inboxCountInterval !== null) {
             clearInterval(this.inboxCountInterval)
             this.inboxCountInterval = null
+        }
+        if (this.taskStatusClickHandler !== null) {
+            document.removeEventListener('click', this.taskStatusClickHandler)
+            this.taskStatusClickHandler = null
         }
     }
 
@@ -110,5 +116,88 @@ export class ClickUpDetector {
                 this.previousInboxCount = currentCount
             }
         }, 500)
+    }
+
+    private setupTaskStatusClickDetector(): void {
+        // Helper function to check if clicked element is a done status menu item
+        const isDoneStatusMenuItem = (element: Element | null): boolean => {
+            if (!element) return false
+
+            // Check data-test attribute for done status indicators
+            const dataTest = element.getAttribute('data-test')
+            if (dataTest) {
+                // Match patterns like: status-list__done, status-list__closed, status-list__complete
+                const donePatterns = ['done', 'closed', 'complete', 'completed', 'finished', 'resolved']
+                for (const pattern of donePatterns) {
+                    if (dataTest.includes(`status-list__${pattern}`) || dataTest.includes(`status__${pattern}`)) {
+                        return true
+                    }
+                }
+            }
+
+            // Check class names for done status menu items
+            const className = element.className
+            if (className && typeof className === 'string') {
+                // Must be a menu item
+                if (className.includes('menu-item') || className.includes('status-list-menu-item')) {
+                    // Check if it's a done status
+                    const lowerClass = className.toLowerCase()
+                    const doneKeywords = ['closed', 'done', 'complete', 'completed', 'finished', 'resolved']
+                    for (const keyword of doneKeywords) {
+                        if (lowerClass.includes(keyword)) {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            // Check text content as last resort
+            const textContent = element.textContent?.trim().toLowerCase()
+            if (textContent) {
+                const doneTexts = ['closed', 'done', 'complete', 'completed', 'finished', 'resolved']
+                // Must be short text (not a long description) and be a menu item
+                if (textContent.length < 20 && className && className.includes('menu-item')) {
+                    for (const text of doneTexts) {
+                        if (textContent === text) {
+                            return true
+                        }
+                    }
+                }
+            }
+
+            return false
+        }
+
+        // Click event handler
+        this.taskStatusClickHandler = (event: Event) => {
+            const target = event.target as Element
+
+            // Check if the clicked element is a done status menu item
+            if (isDoneStatusMenuItem(target)) {
+                this.onActionDetected({
+                    action: 'taskDone',
+                    delay: DELAYS.taskDone
+                })
+                return
+            }
+
+            // Also check parent elements (up to 3 levels) in case user clicked on text/icon inside menu item
+            let parent = target.parentElement
+            let depth = 0
+            while (parent && depth < 3) {
+                if (isDoneStatusMenuItem(parent)) {
+                    this.onActionDetected({
+                        action: 'taskDone',
+                        delay: DELAYS.taskDone
+                    })
+                    return
+                }
+                parent = parent.parentElement
+                depth++
+            }
+        }
+
+        // Add click event listener to document
+        document.addEventListener('click', this.taskStatusClickHandler)
     }
 }

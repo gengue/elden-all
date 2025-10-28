@@ -141,13 +141,21 @@ Used for web applications where actions are detected via DOM observation:
 - Hostname: `app.clickup.com`
 - Actions supported:
   - `inboxCleared` - Polling-based detection (checks every 500ms)
+  - `taskDone` - Click event detection (user clicks done status in dropdown)
 - **Inbox Cleared Detection:**
-  - Polls notification badge/count element every 500ms
-  - Multiple selectors to find inbox button and badge across different ClickUp versions
-  - Extracts count from badge text content, aria-label, or data attributes
+  - Polls inbox item count in the inbox view every 500ms
+  - Multiple selectors to find inbox items and empty states
+  - Extracts count from DOM elements (inbox items, empty state indicators)
   - Triggers when count changes from N (> 0) → 0
   - Uses polling for reliability (similar to Gmail approach)
-  - Retries if badge not found initially (1s delay)
+  - Retries if elements not found initially (1s/2s delays)
+- **Task Done Detection:**
+  - Listens for click events on status dropdown menu items
+  - Detects clicks on done status options via `data-test` attributes (e.g., `status-list__done`, `status-list__closed`)
+  - Also checks class names and text content as fallbacks
+  - Traverses up to 3 parent levels to handle clicks on icons/text inside menu items
+  - Only triggers when user explicitly clicks a done status option (no false triggers from page loads or dropdown opens)
+  - Simple, direct user intent detection approach
 
 ## Adding New Platforms/WebApps
 
@@ -249,4 +257,4 @@ Defined in `src/platforms/base.ts`:
 ### WebApp Actions
 Defined in `src/webapps/base.ts`:
 - Gmail: `emailSent`, `inboxCleared` (both fully implemented)
-- ClickUp: `inboxCleared` (fully implemented)
+- ClickUp: `inboxCleared`, `taskDone` (both fully implemented)

@@ -19,7 +19,8 @@ const banners = {
     repoUnstarred: 'banners/repository-unstarred.webp',
     requestedChange: 'banners/requested-change.webp',
     emailSent: 'banners/email-sent.webp',
-    inboxCleared: 'banners/inbox-cleared.webp'
+    inboxCleared: 'banners/inbox-cleared.webp',
+    taskDone: 'banners/task-done.webp'
 } as const
 
 export type Actions = keyof typeof banners
@@ -50,7 +51,8 @@ const bannerSounds = {
     repoUnstarred: 'enemyFailed',
     requestedChange: 'enemyFailed',
     emailSent: 'newItem',
-    inboxCleared: 'newItem'
+    inboxCleared: 'newItem',
+    taskDone: 'newItem'
 } as const satisfies { [image in Actions]: keyof typeof sounds }
 
 const animations = {

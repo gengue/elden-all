@@ -1,4 +1,4 @@
-export type WebAppActionType = 'emailSent' | 'inboxCleared'
+export type WebAppActionType = 'emailSent' | 'inboxCleared' | 'taskDone'
 
 export interface WebAppActionLabel {
     readonly action: WebAppActionType

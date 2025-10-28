@@ -3,11 +3,13 @@ import type { WebAppActionLabel } from '../base'
 export const CLICKUP_HOSTS = ['app.clickup.com']
 
 export const ACTION_LABELS: readonly WebAppActionLabel[] = [
-    { action: 'inboxCleared', label: 'Inbox cleared' }
+    { action: 'inboxCleared', label: 'Inbox cleared' },
+    { action: 'taskDone', label: 'Task done' }
 ] as const
 
 export const DELAYS = {
-    inboxCleared: 1000
+    inboxCleared: 1000,
+    taskDone: 500
 } as const
 
 // ClickUp UI selectors (may need updating if ClickUp changes their UI)
